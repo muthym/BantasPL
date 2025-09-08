@@ -7,7 +7,7 @@
 
 ## About  
 
-Bantas — a lightweight, educational programming language designed to make programming simple, experimental, and fun. It was created by **Jon Velasco (aka muthym)** in 2013.  
+Bantas — is a lightweight, educational programming language designed to make programming simple, experimental, and fun. The word Bantas is a Tagalog term for a punctuation mark. It was originally developed by Jon Velasco (a.k.a muthym) in 2013 using Rapid-Q, and later revived in August 2025 with the help of AI. The modern prototype is now built on Lua.
 
 - **2013** → Initial release (interpreter was written in Rapid-Q)  
 - **2014** → Last update of the interpreter
