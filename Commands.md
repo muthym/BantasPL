@@ -203,6 +203,6 @@ While many commands can accept unquoted strings, using double quotes (`"`) is a 
 
 ---
 
-(c) 2025 Jon Velasco a.k.a. muthym  
+Copyright (c) 2025 Jon Velasco ( a.k.a. muthym )
 Facebook : MUTHYM's Code  
 e-mail : muthym2020@gmail.com
