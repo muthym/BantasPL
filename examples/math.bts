@@ -1,0 +1,12 @@
+@,1
+>,Enter the first number:
+@,2
+>,Enter the second number:
+@,3
+<,@1
++,@2
+@,4
+<,"The sum is "
+&,@3
+&,.
+?,@

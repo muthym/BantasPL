@@ -1,0 +1,14 @@
+@,1
+$,100
+@,2
+<,"The generated number is "
+&,@1
+&,.
+?,@
+?,
+@,1
+#,>50
+  ?,The number is greater than 50.
+!
+  ?,The number is *NOT* greater than 50.
+;
