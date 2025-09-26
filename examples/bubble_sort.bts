@@ -1,0 +1,105 @@
+' Bubble Sort Demo Program
+' This program demonstrates the Bubble Sort algorithm.
+' It prompts the user for a list of numbers, sorts them, and then displays the sorted list.
+' --- Stacks Used ---
+' 1: count of elements
+' 2: index pointer (for dataset access)
+' 8: temporary value holder (for swapping elements)
+' 9: temporary value holder (for comparison)
+' 20: outer loop boundary
+' 21: inner loop boundary
+' 22: temporary index for comparison
+' 23: temporary index for comparison
+' 101 onwards: the dataset
+' --- Introduction ---
+?,Bantas Bubble Sort Demo
+?,========================
+?,This program will sort a list of numbers for you.
+?,
+' --- Input ---
+@,1 ' Activate stack 1 for the count
+>,How many numbers would you like to sort?
+?,Please enter the numbers, one per line:
+' --- Input Loop ---
+' Loop for the total number of elements
+[,1
+  @,2 ' Use stack 2 as the dataset index pointer
+  <,@0 ' Get the current loop counter (from 1 to N)
+  +,100 ' Add base address for the dataset
+  @,@2 ' Activate the correct stack location for input
+  >,> ' Read value from input into the activated stack
+
+  @,0 ' Activate the virtual loop counter
+  +,1 ' Manually increment it
+],@1
+?,
+?,Thank you. All numbers have been entered.
+?,Sorting...
+?,
+' --- Bubble Sort Algorithm ---
+' The outer loop runs (N-1) times.
+@,20
+<,@1
+-,1
+' Outer loop: from 1 to N-1
+[,1
+  ' Calculate the boundary for the inner loop.
+  ' It should run (N - outer_loop_counter) times.
+  @,21
+  <,@1 ' Get the total count N
+  -,@0 ' Subtract the current outer loop counter
+
+  ' Inner loop: from 1 to the calculated boundary
+  [,1
+    ' Compare adjacent elements: data[j] and data[j+1]
+    ' Get index for data[j]
+    @,22
+    <,@0 ' Get inner loop counter (j)
+    +,100
+    ' Get index for data[j+1]
+    @,23
+    <,@0          ' Get inner loop counter (j)
+    +,101
+
+    ' Compare values
+    @,8 ' Use stack 8 as temp for comparison
+    <,@@22 ' Get value of data[j]
+    @,9 ' Use stack 9 as temp for comparison
+    <,@@23 ' Get value of data[j+1]
+
+    @,8
+    #,>@9 ' if data[j] > data[j+1]
+      ' Swap the values
+      @,@22 ' Activate stack for data[j]
+      <,@9  ' data[j] = data[j+1]
+      @,@23 ' Activate stack for data[j+1]
+      <,@8  ' data[j+1] = data[j]
+    !
+      ' Elements are in order, do nothing
+    ;
+
+    @,0 ' Activate the virtual loop counter for the inner loop
+    +,1 ' Manually increment it
+  ],@21
+
+  @,0 ' Activate the virtual loop counter for the outer loop
+  +,1 ' Manually increment it
+],@20
+' --- Output Sorted List ---
+?,
+?,The sorted list is:
+?,
+' Output loop: from 1 to N
+[,1
+  @,2
+  <,@0
+  +,100
+  @,@2
+  ?,@   ' Print the value from the active stack
+
+  @,0 ' Activate the virtual loop counter
+  +,1 ' Manually increment it
+],@1
+?,========================
+?,
+?,Program finished.
