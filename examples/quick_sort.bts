@@ -1,0 +1,229 @@
+' --- Quick Sort Implementation for Bantas ---
+
+' --- Configuration & Registers ---
+' 1: n (size of the array)
+
+' -- Custom Stack Registers --
+' 2: stack_pointer (points to the top of our manual stack)
+' Custom stack for (low, high) pairs starts at address 301.
+' It stores low at 301, high at 302, next low at 303, etc.
+
+' -- Partition-specific Registers --
+' 3: low (start of subarray)
+' 4: high (end of subarray)
+' 5: pivot_value
+' 6: p_index (wall index `i` in Lomuto partition)
+' 7: j_counter (loop counter for partition)
+' 8: temp_swap
+' 9: pointer_a
+' 10: pointer_b
+' 11: calculation register
+
+' Array data is in stacks 101-110
+
+' --- Setup the Array ---
+?, "--- Quick Sort in Bantas ---"
+
+@,1
+<,10         ' n = 10
+
+' Data stored from stack 101 to 110
+@,101
+<,4
+@,102
+<,10
+@,103
+<,3
+@,104
+<,5
+@,105
+<,1
+@,106
+<,8
+@,107
+<,9
+@,108
+<,2
+@,109
+<,7
+@,110
+<,6
+
+' --- Print Initial Array ---
+?, "Initial unsorted array:"
+[,1
+  @,9
+  <,100
+  +,@0
+  ?,@@9
+  @,0
+  +,1
+],@1
+?, ""
+
+' --- Start of Iterative Quick Sort ---
+?, "Sorting..."
+
+' --- Initialize Custom Stack ---
+' Push initial problem (1, n) onto our stack
+@,2
+<,2          ' stack_pointer = 2
+@,301
+<,1          ' stack[0] = 1 (low)
+@,302
+<,@1         ' stack[1] = 10 (high)
+
+' --- Main Loop: while stack_pointer > 0 ---
+[,1 ' while(true)
+  @,2
+  #,<1
+    @,0
+    <,0
+  ;
+  @,0
+  #,>0
+    ' -- Pop high and low from custom stack --
+    @,4          ' high = stack[stack_pointer - 1]
+    <,300
+    +,@2
+    <,@@4
+    @,2
+    -,1
+    @,3          ' low = stack[stack_pointer - 1]
+    <,300
+    +,@2
+    <,@@3
+    @,2
+    -,1
+
+    ' --- PARTITION(array, low, high) ---
+    ' Using Lomuto partition scheme
+    
+    ' pivot_value = array[high]
+    @,9
+    <,100
+    +,@4
+    @,5
+    <,@@9
+
+    ' p_index (the wall) = low - 1
+    @,6
+    <,@3
+    -,1
+
+    ' for j from low to high - 1
+    [,@3
+      ' j is the loop counter @0
+      ' if array[j] <= pivot_value
+      @,9
+      <,100
+      +,@0
+      @,8
+      <,@@9
+      -,@5
+      #,<1 ' includes <= 0
+        ' p_index++
+        @,6
+        +,1
+        ' swap array[p_index] and array[j]
+        @,9
+        <,100
+        +,@6
+        @,10
+        <,100
+        +,@0
+        @,8
+        <,@@9
+        @,@9
+        <,@@10
+        @,@10
+        <,@8
+      ;
+      @,0
+      +,1
+    ],<@4
+
+    ' Swap array[p_index + 1] and array[high] (the pivot)
+    @,9
+    <,100
+    +,@6
+    +,1
+    @,10
+    <,100
+    +,@4
+    @,8
+    <,@@9
+    @,@9
+    <,@@10
+    @,@10
+    <,@8
+
+    ' p_index is now at p_index + 1
+    @,6
+    +,1
+
+    ' --- Push subproblems onto custom stack ---
+    ' if left part is valid (low < p_index - 1)
+    @,11
+    <,@6
+    -,1
+    -,@3
+    #,>0
+      @,2
+      +,1
+      @,9
+      <,300
+      +,@2
+      @,@9
+      <,@3 ' push low
+      @,2
+      +,1
+      @,9
+      <,300
+      +,@2
+      @,11
+      <,@6
+      -,1
+      @,@9
+      <,@11 ' push p_index - 1
+    ;
+
+    ' if right part is valid (p_index + 1 < high)
+    @,11
+    <,@4
+    -,@6
+    -,1
+    #,>0
+      @,2
+      +,1
+      @,9
+      <,300
+      +,@2
+      @,11
+      <,@6
+      +,1
+      @,@9
+      <,@11 ' push p_index + 1
+      @,2
+      +,1
+      @,9
+      <,300
+      +,@2
+      @,@9
+      <,@4 ' push high
+    ;
+  ;
+],>0
+
+?, ""
+?, "--- Sort Complete ---"
+?, "Final sorted array:"
+' --- Print Final Array ---
+[,1
+  @,9
+  <,100
+  +,@0
+  ?,@@9
+  @,0
+  +,1
+],@1
