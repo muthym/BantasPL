@@ -1,0 +1,139 @@
+' --- Insertion Sort Implementation for Bantas ---
+
+' --- Configuration & Registers ---
+' 1: n (size of the array)
+' 2: i (outer loop counter, from 2 to n)
+' 3: j (inner loop counter)
+' 4: key (the value being inserted)
+' 5: pointer_a (for array access)
+' 6: pointer_b (for array access)
+' 7: temp_val (for holding array[j] during comparison)
+' Stacks 101 onwards are for the array data.
+
+' --- Setup the Array ---
+?, "--- Insertion Sort in Bantas ---"
+
+@,1
+<,10         ' n = 10
+
+' Data stored from stack 101 to 110
+@,101
+<,4
+@,102
+<,10
+@,103
+<,3
+@,104
+<,5
+@,105
+<,1
+@,106
+<,8
+@,107
+<,9
+@,108
+<,2
+@,109
+<,7
+@,110
+<,6
+
+' --- Print Initial Array ---
+?, "Initial unsorted array:"
+[,1
+  @,5
+  <,100
+  +,@0
+  ?,@@5
+  @,0
+  +,1
+],@1
+?, ""
+
+' --- Start of Insertion Sort ---
+?, "Sorting..."
+
+' Outer loop: for i from 2 to n
+@,2
+<,2
+[,@2
+
+  ' key = array[i]
+  @,5       ' pointer_a = 100 + i
+  <,100
+  +,@0
+  @,4       ' key = array[pointer_a]
+  <,@@5
+
+  ' j = i - 1
+  @,3
+  <,@0
+  -,1
+
+  ' Inner loop: while (j >= 1 and array[j] > key)
+  [,1 ' This is a while(true) loop, we break manually
+    
+    ' Check condition: j >= 1
+    @,3
+    #,<1 ' if j < 1
+      @,
+      <,0 ' Break the while(true) loop
+    !
+      ' j is >= 1, so check condition: array[j] > key
+      @,5       ' pointer_a = 100 + j
+      <,100
+      +,@3
+      @,7       ' temp_val = array[pointer_a]
+      <,@@5
+
+      @,7       ' temp_val = temp_val - key
+      -,@4
+
+      #,>0      ' if array[j] > key (i.e., temp_val > 0)
+        ' -- Shift element to the right --
+        ' array[j+1] = array[j]
+        @,6       ' pointer_b = 100 + j + 1
+        <,100
+        +,@3
+        +,1
+        @,5       ' pointer_a = 100 + j
+        <,100
+        +,@3
+        @,@6      ' array[pointer_b] = array[pointer_a]
+        <,@@5
+
+        ' -- Decrement j --
+        @,3
+        -,1
+      !
+        ' array[j] <= key, so break the inner loop
+        @,
+        <,0 ' Break the while(true) loop
+      ;
+    ;
+  ],>0 ' End of while(true) loop
+
+  ' -- Insert key into its correct position (j+1) --
+  @,5       ' pointer_a = 100 + j + 1
+  <,100
+  +,@3
+  +,1
+  @,@5      ' array[pointer_a] = key
+  <,@4
+
+  @,0
+  +,1
+],@1
+
+?, ""
+?, "--- Sort Complete ---"
+?, "Final sorted array:"
+' --- Print Final Array ---
+[,1
+  @,5
+  <,100
+  +,@0
+  ?,@@5
+  @,0
+  +,1
+],@1
