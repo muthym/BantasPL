@@ -1,0 +1,98 @@
+' --- ROT13 Implementation (Simplified) ---
+' Input: String in stack 1
+' Output: ROT13'd string in stack 10
+
+' --- Setup ---
+@,1
+'<,"The quick brown fox jumps over the lazy dog."
+>,Enter a text:
+?,@1
+
+@,10
+<,"" ' Initialize result string
+
+@,2
+_,@1 ' Get length of input string
+
+' --- Main Loop ---
+[,1
+  ' --- Get Nth character and its ASCII value ---
+  @,3
+  <,@1
+  (,@0
+  ),1
+  @,4
+  .,@3
+
+  ' --- Start Conditional Logic ---
+  @,4
+  #,>90 ' Check if character is > 'Z'
+    ' It is > 'Z', so it's not an uppercase letter. Check for lowercase.
+    @,4
+    #,>122 ' Check if character is > 'z'
+      ' It is > 'z', so it is a non-letter.
+      @,9
+      <,@3
+    ! ' It is <= 'z'. Check if it is < 'a'.
+      @,4
+      #,<97 ' Check if character is < 'a'
+        ' It is < 'a' (and > 'Z'), so it is a non-letter.
+        @,9
+        <,@3
+      ! ' It is >= 'a'. So, it IS a lowercase letter.
+        ' --- Lowercase ROT13 Logic ---
+        @,5
+        <,@4
+        -,97
+        +,13
+        ' --- Simplified Modulo 26 ---
+        @,5
+        #,<26
+        !
+          @,5
+          -,26
+        ;
+        ' --- End Modulo ---
+        +,97
+        @,9
+        :,@5
+      ;
+    ;
+  ! ' It is <= 'Z'. Check if it is an uppercase letter.
+    @,4
+    #,<65 ' Check if character is < 'A'
+      ' It is < 'A', so it is a non-letter.
+      @,9
+      <,@3
+    ! ' It is >= 'A'. So, it IS an uppercase letter.
+      ' --- Uppercase ROT13 Logic ---
+      @,5
+      <,@4
+      -,65
+      +,13
+      ' --- Simplified Modulo 26 ---
+      @,5
+      #,<26
+      !
+        @,5
+        -,26
+      ;
+      ' --- End Modulo ---
+      +,65
+      @,9
+      :,@5
+    ;
+  ;
+
+  ' --- Append the resulting character (@9) to the result string (@10) ---
+  @,10
+  &,@9
+
+  ' --- MANUALLY INCREMENT THE MAIN LOOP COUNTER ---
+  @,0
+  +,1
+
+],@2 ' End of main loop
+
+' --- Print final result ---
+?,@10
