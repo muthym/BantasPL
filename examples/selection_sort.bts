@@ -1,0 +1,130 @@
+' Selection Sort Demo Program
+' This program demonstrates the Selection Sort algorithm.
+' It prompts the user for a list of numbers, sorts them, and then displays the sorted list.
+' --- Stacks Used ---
+' 1: count of elements (N)
+' 2: temporary index pointer (for dataset access)
+' 8: temporary value holder (for swapping)
+' 9: temporary value holder (for comparison)
+' 20: outer loop counter (i)
+' 21: inner loop counter (j)
+' 22: index of current minimum element found in inner loop (min_idx)
+' 23: value of current minimum element found in inner loop (min_val)
+' 101 onwards: the dataset
+' --- Introduction ---
+?,Bantas Selection Sort Demo
+?,========================
+?,This program will sort a list of numbers for you.
+?,
+' --- Input ---
+@,1 ' Activate stack 1 for the count
+>,How many numbers would you like to sort?
+?,Please enter the numbers, one per line:
+' --- Input Loop ---
+' Loop for the total number of elements
+[,1
+  @,2 ' Use stack 2 as the dataset index pointer
+  <,@0 ' Get the current loop counter (from 1 to N)
+  +,100 ' Add base address for the dataset
+  @,@2 ' Activate the correct stack location for input
+  >,> ' Read value from input into the activated stack
+
+  @,0 ' Activate the virtual loop counter
+  +,1 ' Manually increment it
+],@1
+?,
+?,Thank you. All numbers have been entered.
+?,Sorting...
+?,
+' --- Selection Sort Algorithm ---
+' Outer loop: i from 1 to N-1
+' The outer loop counter is @0
+@,20 ' i_limit = N-1
+<,@1
+-,1
+[,1 ' Loop i from 1 to i_limit
+
+  ' Assume current element (data[i]) is the minimum
+  ' Store its index (i + 100) in stack 22 (min_idx)
+  @,22
+  <,@0
+  +,100
+  
+  ' Store its value (data[i]) in stack 23 (min_val)
+  @,23
+  <,@@22
+
+  ' Inner loop: j from i+1 to N
+  ' The inner loop counter is @0
+  @,21 ' j_start = i+1
+  <,@0 ' Get outer loop counter (i)
+  +,1 ' Add 1 to get j_start
+  
+  [,@21 ' Loop j from j_start to N (where N is in stack 1)
+
+    ' Get current element data[j]
+    ' Store its index (j + 100) in stack 8 (current_idx)
+    @,8
+    <,@0 ' Get inner loop counter (j)
+    +,100
+    
+    ' Store its value (data[j]) in stack 9 (current_val)
+    @,9
+    <,@@8
+
+    ' Compare current_val with min_val
+    @,9
+    #,<@23 ' If current_val < min_val
+      ' Update min_val and min_idx
+      @,23
+      <,@9 ' min_val = current_val
+      @,22
+      <,@8 ' min_idx = current_idx
+    ;
+
+    @,0 ' Manually increment inner loop counter
+    +,1
+  ],@1 ' End inner loop (j to N)
+
+  ' After inner loop, min_idx holds the index of the smallest element in the unsorted part.
+  ' Swap data[i] with data[min_idx]
+
+  ' Get index for data[i] (current outer loop element)
+  @,8 ' i_data_idx = i + 100
+  <,@0 ' Get outer loop counter (i)
+  +,100
+
+  ' Get value of data[i] into temp stack 9 (temp_val)
+  @,9
+  <,@@8
+
+  ' data[i] = data[min_idx]
+  @,@8 ' Activate stack for data[i]
+  <,@@22 ' Get value from min_idx and put it into data[i]
+
+  ' data[min_idx] = temp_val
+  @,@22 ' Activate stack for data[min_idx]
+  <,@9 ' Put temp_val into data[min_idx]
+
+  @,0 ' Manually increment outer loop counter
+  +,1
+],@20 ' End outer loop (i to N-1)
+
+' --- Output Sorted List ---
+?,
+?,The sorted list is:
+?,
+' Output loop: from 1 to N
+[,1
+  @,2
+  <,@0
+  +,100
+  @,@2
+  ?,@   ' Print the value from the active stack
+
+  @,0 ' Activate the virtual loop counter
+  +,1 ' Manually increment it
+],@1
+?,========================
+?,
+?,Program finished.
