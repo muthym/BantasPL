@@ -1,0 +1,325 @@
+' Bantas Statistics Calculator
+' Calculates mean, variance, standard deviation, median and mode using stored data.
+
+' --- Introduction ---
+?,Bantas Statistics Calculator
+?,==========================
+?,This program will calculate the mean, variance, standard deviation, median and mode.
+?,
+
+' --- Stacks Used ---
+' 1: count of elements
+' 2: index pointer (for dataset access)
+' 3: sum of all numbers
+' 4: sum of the squares of all numbers
+' 5: calculated mean
+' 6: calculated variance
+' 7: calculated standard deviation
+' 8: temporary value holder
+' 9: temporary value holder (for variance and median calculations)
+' 15: calculated median
+' 16: calculated mode
+' 20: outer loop counter (bubble sort)
+' 21: inner loop counter (bubble sort)
+' 22: temporary value holder (bubble sort, for swapping)
+' 23: temporary value holder (bubble sort, for swapping)
+' 25: even/odd flag (for median calculation)
+' 26: temporary copy of count (for median calculation)
+' 27: temporary index (for median calculation)
+' 30-35: temporary holders for mode calculation
+' 101 onwards: the dataset
+' 1000 onwards: frequency map (for mode calculation)
+
+' --- Input ---
+@,1 ' Activate stack 1 for the count
+>,How many numbers are in your dataset? 
+
+?,Please enter the numbers, one per line:
+
+' --- Input Loop ---
+[,1
+  @,2
+  <,@0
+  +,100
+  
+  @,@2
+  >,> 
+
+  @,0
+  +,1
+],@1
+
+?,
+?,Thank you. All numbers have been entered.
+?,Calculating...
+?,
+
+' --- Calculation Loop ---
+@,3
+<,0 ' Initialize sum
+@,4
+<,0 ' Initialize sum of squares
+
+[,1
+  ' Calculate data stack index
+  @,2
+  <,@0
+  +,100
+
+  ' Get the value indirectly and store in temp stack 8
+  @,8
+  <,@@2
+
+  ' Add to sum
+  @,3
+  +,@8
+
+  ' Add to sum of squares
+  @,8 ' Activate temp stack
+  *,@8 ' Square the value
+  @,4 ' Activate sum of squares stack
+  +,@8 ' Add the squared value
+
+  ' Manually increment loop counter
+  @,0
+  +,1
+],@1
+
+' --- Mode Calculation ---
+' Stacks used: 16 (result), 30-35 (temps), 1000+ (freq map)
+
+' -- FREQUENCY COUNT --
+[,1
+    ' 1. Get number from dataset (which starts at 101)
+    @,30
+    <,@0
+    +,100
+    @,31
+    <,@@30
+
+    ' 2. Calculate freq map address (base 1000)
+    @,32
+    <,1000
+    +,@31
+
+    ' 3. Activate freq counter stack and increment
+    @,@32
+    +,1
+
+    ' 4. Manually increment loop counter
+    @,
+    +,1
+],@1
+
+' -- FIND THE MODE --
+@,34
+<,0
+@,35
+<,0
+
+[,1
+    ' 1. Get number from dataset
+    @,30
+    <,@0
+    +,100
+    @,31
+    <,@@30
+
+    ' 2. Get its frequency
+    @,32
+    <,1000
+    +,@31
+    @,33
+    <,@@32
+
+    ' 3. Check if highest
+    @,34
+    #,<@33
+        @,34
+        <,@33
+        @,35
+        <,@31
+    ;
+
+    ' 4. Manually increment loop counter
+    @,
+    +,1
+],@1
+
+' Store final mode result in stack 16
+@,16
+<,@35
+
+' --- Final Calculations ---
+
+' --- Calculate Mean ---
+@,3
+/,@1
+@,5
+<,@3 ' Stack 5 = MEAN
+
+' --- Calculate Variance ---
+@,9 ' Use stack 9 for mean^2
+<,@5 ' Copy mean to stack 9
+*,@9 ' Stack 9 = MEAN^2
+
+@,4
+/,@1 ' Stack 4 = sum_of_squares / count
+
+-,@9 ' Stack 4 = VARIANCE
+@,6
+<,@4 ' Stack 6 = VARIANCE
+
+' --- Calculate Standard Deviation ---
+@,7
+<,@6 ' Copy variance to stack 7
+^,0.5 ' Stack 7 = SQRT(VARIANCE) = STD DEV
+
+
+' --- Median Calculation ---
+' This requires sorting the dataset. We will use Bubble Sort.
+
+' Outer loop for Bubble Sort
+@,20 ' i = N-1
+<,@1
+-,1
+[,1
+
+  ' Inner loop for Bubble Sort
+  @,21 ' j_limit = N - i
+  <,@1
+  -,@0
+  [,1
+    ' Compare adjacent elements: data[j] and data[j+1]
+
+    ' Get index for data[j]
+    @,22
+    <,@0
+    +,100
+
+    ' Get index for data[j+1]
+    @,23
+    <,@0
+    +,101
+
+    ' Compare values
+    @,8 ' Use stack 8 as temp for comparison
+    <,@@22 ' Get value of data[j]
+    
+    @,9 ' Use stack 9 as temp for comparison
+    <,@@23 ' Get value of data[j+1]
+
+    @,8
+    #,>@9 ' if data[j] > data[j+1]
+      ' Swap the values
+      @,@22 ' Activate stack for data[j]
+      <,@9  ' data[j] = data[j+1]
+
+      @,@23 ' Activate stack for data[j+1]
+      <,@8  ' data[j+1] = data[j]
+    !
+      ' Elements are in order, do nothing
+    ;
+
+    ' Manually increment inner loop counter
+    @,0
+    +,1
+  ],@21
+
+  ' Manually increment outer loop counter
+  @,0
+  +,1
+],@20
+
+' --- Find Middle Element for Median ---
+' The data is now sorted. Stacks 101, 102, ... hold the sorted numbers.
+
+' First, check if count is even or odd.
+@,25 ' Use stack 25 as a flag for even/odd. 0=even, 1=odd
+<,0
+@,26 ' Use stack 26 as a temp copy of the count
+<,@1
+
+' Loop by subtracting 2 until we get to 0 or 1
+[,@26
+  @,26
+  -,2
+  #,<0
+    @,25 ' The original number was odd
+    <,1
+    @,0 ' Break the loop by setting counter to max
+    <,@26
+  !
+    @,26
+    #,=0
+      @,25 ' The original number was even
+      <,0
+      @,0 ' Break the loop
+      <,@26
+    ;
+  ;
+],0
+
+@,15 ' Use stack 15 for the median result
+
+@,25 ' Check the even/odd flag
+#,=1 ' Count is ODD
+  ' Median is the element at index (count+1)/2
+  @,27 ' Use stack 27 for the index
+  <,@1
+  +,1
+  /,2
+  +,100 ' Adjust for data stack start
+  
+  @,15
+  <,@@27
+!
+  ' Count is EVEN
+  ' Median is the average of elements at index count/2 and count/2 + 1
+  @,27 ' Index 1
+  <,@1
+  /,2
+  +,100
+
+  @,28 ' Index 2
+  <,@1
+  /,2
+  +,1
+  +,100
+
+  ' Get the two middle values
+  @,8
+  <,@@27
+  @,9
+  <,@@28
+
+  ' Average them
+  @,8
+  +,@9
+  /,2
+  @,15
+  <,@8
+;
+
+
+' --- Output Results ---
+?,==========================
+?,RESULTS:
+?,
+?,Mean:
+?,@5
+?,
+?,Variance:
+?,@6
+?,
+?,Standard Deviation:
+?,@7
+?,
+?,Median:
+?,@15
+?,
+?,Mode:
+?,@16
+?,==========================
+?,
+?,Program finished.
