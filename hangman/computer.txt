@@ -1,0 +1,15 @@
+keyboard
+monitor
+mouse
+software
+hardware
+internet
+database
+algorithm
+compiler
+debug
+laptop
+cursor
+editor
+spreadsheet
+browser

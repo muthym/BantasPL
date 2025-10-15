@@ -1,0 +1,522 @@
+' Bantas Hangman - A Fun Game for Kids!
+' Fixed and Finished by Gemini
+' Play Again feature added by Gemini
+
+' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+' ~ STACK ASSIGNMENTS
+' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+' 1-9: Core Game State
+'   1: Secret Word (e.g., "apple")
+'   2: Display Word (e.g., "a _ _ _ e")
+'   3: Guessed Letters (e.g., "aeiou")
+'   4: Guesses Left
+'   5: Player's current guess
+'   6: Temporary value / Loop counter
+'   7: Boolean-like flag (1=true, 0=false)
+'   8: Total number of words loaded
+
+' 10-19: Color Codes
+'   10: Escape Character
+'   11: Red
+'   12: Green
+'   14: Reset
+'   15: Yellow
+'   16: Magenta
+'   17: Newline
+
+' 21-27: Hangman ASCII Art Stages
+
+' 31+: Word List
+
+' 98: Play Again input
+' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+' --- INITIALIZATION (Done Once) ---
+
+' 1. Set up Color Codes
+@,10
+:,27 ' Escape Character
+@,11
+<,@10
+&,[31m ' Red
+@,12
+<,@10
+&,[32m ' Green
+@,14
+<,@10
+&,[0m ' Reset
+@,15
+<,@10
+&,[33m ' Yellow
+@,16
+<,@10
+&,[35m ' Magenta
+@,17
+:,10 ' Newline Character (ASCII 10)
+
+' 2. Set up Hangman ASCII Art
+@,21 ' 6 guesses left
+<,"  +---+"
+&,@17
+&,"  |   |"
+&,@17
+&,"      |"
+&,@17
+&,"      |"
+&,@17
+&,"      |"
+&,@17
+&,"      |"
+&,@17
+&,"========="
+@,22 ' 5 guesses left
+<,"  +---+"
+&,@17
+&,"  |   |"
+&,@17
+&,"  O   |"
+&,@17
+&,"      |"
+&,@17
+&,"      |"
+&,@17
+&,"      |"
+&,@17
+&,"========="
+@,23 ' 4 guesses left
+<,"  +---+"
+&,@17
+&,"  |   |"
+&,@17
+&,"  O   |"
+&,@17
+&,"  |   |"
+&,@17
+&,"      |"
+&,@17
+&,"      |"
+&,@17
+&,"========="
+@,24 ' 3 guesses left
+<,"  +---+"
+&,@17
+&,"  |   |"
+&,@17
+&,"  O   |"
+&,@17
+&," /|   |"
+&,@17
+&,"      |"
+&,@17
+&,"      |"
+&,@17
+&,"========="
+@,25 ' 2 guesses left
+<,"  +---+"
+&,@17
+&,"  |   |"
+&,@17
+&,"  O   |"
+&,@17
+&," /|\  |"
+&,@17
+&,"      |"
+&,@17
+&,"      |"
+&,@17
+&,"========="
+@,26 ' 1 guess left
+<,"  +---+"
+&,@17
+&,"  |   |"
+&,@17
+&,"  O   |"
+&,@17
+&," /|\  |"
+&,@17
+&," /    |"
+&,@17
+&,"      |"
+&,@17
+&,"========="
+@,27 ' 0 guesses left
+<,"  +---+"
+&,@17
+&,"  |   |"
+&,@17
+&,"  O   |"
+&,@17
+&," /|\  |"
+&,@17
+&," / \  |"
+&,@17
+&,"      |"
+&,@17
+&,"========="
+
+' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+' ~ "PLAY AGAIN" LOOP - This is the main game driver
+' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[,1 ' Outer loop for playing multiple games
+
+  ' --- PER-GAME INITIALIZATION ---
+  ' This section runs at the start of each new game.
+
+  ' --- Welcome Message & Category Selection ---
+  ??,@12
+  ?,** Welcome to Bantas Hangman! **
+  ?,@14
+  ?,
+
+  ' Loop for category selection
+  [,1
+
+    ?,Select a category:
+    ?,"1: Fruits"
+    ?,"2: History"
+    ?,"3: Science"
+    ?,"4: Computer"
+    ?,"5: Animals"
+    ?,
+
+    @,5 ' Use stack 5 for user input
+    >,Enter the number of your choice: 
+
+    ' Check if input is valid (1-5)
+    @,7 
+    <,0 ' Reset flag
+    @,5 
+    #,>0
+      @,5 
+      #,<6
+        @,7 
+        <,1 ' Set flag to valid
+      ;
+    ;
+
+    @,7 
+    #,=1
+      @,0 
+      <,999 ' Exit loop
+      !
+      ??,@11
+      ?,"Invalid choice. Please enter a number between 1 and 5."
+      ?,@14
+      ?,""
+    ;
+    @,0 
+    +,1
+  ],999
+
+  @,6
+  <,@5 ' Copy the value of stack 5 to stack 6
+
+  ' -- Load words based on category selection --
+  @,6
+  #,=1
+    @,31 ' Set active stack to 31 (start of word list)
+    |,"fruits.txt"
+  ;
+  @,6
+  #,=2
+    @,31 ' Set active stack to 31 (start of word list)
+    |,"history.txt"
+  ;
+  @,6
+  #,=3
+    @,31 ' Set active stack to 31 (start of word list)
+    |,"science.txt"
+  ;
+  @,6
+  #,=4
+    @,31 ' Set active stack to 31 (start of word list)
+    |,"computer.txt"
+  ;
+  @,6
+  #,=5
+    @,31 ' Set active stack to 31 (start of word list)
+    |,"animals.txt"
+  ;
+
+  ' 4. Count the total number of loaded words
+  @,8
+  <,10 ' All categories have 10 words
+
+  ' 5. Select a Random Word
+  @,6
+  $,@8     ' Get a random number between 1 and total words
+  +,30     ' Offset to the word list start stack (31)
+
+  @,1      ' Secret Word
+  <,@@6    ' Copy the randomly selected word to stack 1
+
+  ' --- NEW: Sanitize the data ---
+  ' Trim the secret word and store the clean version back into stack 1
+  @,1
+  ><,@1
+
+  ' 6. Create the initial Display Word (e.g., "_")
+  @,2
+  <,''
+  @,6
+  _,@1     ' Get length of the secret word
+  [,1
+    @,2
+    &,_
+    @,0
+    +,1
+  ],@6
+
+  ' 7. Set initial Guesses Left
+  @,4
+  <,6
+
+  ' 8. Clear Guessed Letters
+  @,3
+  <,''
+
+  ' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ' ~ INNER GAME LOOP - For a single round of Hangman
+  ' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  [,1 ' Main loop - runs until win/loss condition sets counter to 999
+
+    ' -- Display Header & Hangman Art --
+    ??,@16
+    ??,--- HANGMAN ---
+    ?,@14
+    @,6
+    <,27
+    -,@4
+    ??,@11
+    ??,@@6
+    ?,@14
+
+    ' -- Display Game Info --
+    ??,@15
+    ??,Word: 
+    ??,@14
+    ?,@2
+    ??,@15
+    ??,Guessed: 
+    ??,@14
+    ?,@3
+    ??,@15
+    ??,Guesses Left: 
+    ??,@14
+    ?,@4
+    ?,
+
+    ' -- Get Player Guess --
+    @,5
+    >,Guess a letter: 
+    @,5
+    %,l
+    ' Convert guess to lowercase
+
+    ' -- Validation: Check if input is a single letter --
+    @,6
+    _,@5
+    #,=1
+      ' Input is valid (length is 1), so we proceed.
+      ' -- Check if letter was already guessed --
+      @,7       ' Set found flag to 0 by default
+      <,0
+      @,18      ' Set active stack to 18
+      _,@3      ' Get length of guessed letters (from stack 3) into stack 18
+      @,18      ' Set active stack to 18 again (to be safe)
+      #,=0      ' Check if length is 0
+        ' If length is 0, do nothing. Flag is already 0.
+        !
+        ' If length is not 0, then proceed with the loop to check.
+        [,1       ' Loop from 1 to length of guessed letters
+          @,28      ' Get char from guessed letters string
+          <,@3
+          (,@0      ' Use @0 as index
+          ),1
+          #,=@5     ' Compare with player's guess
+            @,7       ' Set found flag
+            <,1
+            @,0       ' Exit loop by setting @0 to a large value
+            <,9999
+          ;
+          @,0
+          +,1
+        ],@18
+      ;
+
+      @,7
+      #,=1 ' If found flag is set
+        ??,@11
+        ?,You already guessed that letter!
+        !,''
+        ' -- New Guess: Add to list and check against word --
+        @,3
+        &,@5
+
+        ' -- Check if letter is in the secret word --
+        @,7
+        <,0 ' Reset found flag for this check
+        @,18      ' Use stack 18 for the length of the secret word
+        _,@1
+        [,1 ' Loop through secret word
+          @,28
+          <,@1
+          (,@0
+          ),1
+          #,=@5 ' Compare with player's guess
+            @,7
+            <,1 ' Set found flag
+          ;
+          @,0
+          +,1
+        ],@18
+
+        @,7
+        #,=1 ' If found flag is set (correct guess)
+          ??,@12
+          ?,CORRECT!
+          !,''
+          ' -- Incorrect Guess --
+          ??,@11
+          ?,NOPE!
+          @,4
+          -,1
+        ;
+      ;
+      !,''
+      ' Input is invalid (not 1 character)
+      ??,@11
+      ?,Please enter only a single letter.
+    ;
+
+    ' -- Update Display Word --
+    @,2
+    <,"" ' Clear the display word
+
+    @,6          ' Use stack 6 for the length of the secret word
+    _,@1
+    [,1          ' Loop from 1 to length of secret word. @0 is the outer loop counter.
+      @,28        ' Get the character from the secret word at the current position
+      <,@1
+      (,@0
+      ),1
+
+      @,7         ' Flag: has this character been guessed?
+      <,0         ' Default to 0 (false)
+
+      @,18        ' Use stack 18 for the length of the guessed letters string
+      _,@3
+      #,>0        ' Only check if there are guessed letters
+        [,1         ' Inner loop: check against guessed letters. @0 is now the inner loop counter.
+          @,29      ' Get char from guessed letters
+          <,@3
+          (,@0
+          ),1
+          #,=@28    ' If it matches...
+            @,7
+            <,1     ' Set flag to 1 (true)
+            @,0
+            <,9999  ' Exit inner loop
+          ;
+          @,0
+          +,1
+        ],@18
+      ;
+
+      @,7
+      #,=1        ' If flag is 1 (character was guessed)
+        @,2
+        &,@28     ' Append the actual character
+        !
+        @,2
+        &,_ '' Otherwise, append an underscore
+      ;
+
+      @,0
+      +,1
+    ],@6
+
+    ' -- Check for WIN --
+    @,7       ' Assume win (set flag to 1)
+    <,1
+    @,95      ' Loop limit (length of display word)
+    _,@2
+    @,6       ' Loop counter
+    <,1
+    [,@6      ' Loop through display word using stack 6 as a counter
+      @,28      ' Get character from display word
+      <,@2
+      (,@0
+      ),1
+      #,=_      ' Check if it is an underscore
+        @,7
+        <,0    ' Found an underscore, so game is not won (set flag to 0)
+        @,0
+        <,9999 ' Exit loop early
+      ;
+      @,0
+      +,1
+    ],@95
+
+    @,7
+    #,=1      ' If flag is still 1 (no underscores found)
+      ??,@12
+      ??,** YOU WIN! **
+      ?,@14
+      ??,The word was: 
+      ?,@1
+      @,0       ' Set main loop counter to 999 to exit
+      <,999
+    ;
+
+    ' -- Check for LOSS --
+    @,4
+    #,<1
+      ' -- Display FINAL Hangman Art for loss --
+      ??,@16
+      ??,--- HANGMAN ---
+      ?,@14
+      @,6
+      <,27 ' Art for 0 guesses left is in stack 27
+      ??,@11
+      ??,@@6
+      ?,@14
+
+      ??,@11
+      ?,** GAME OVER **
+      ?,@14
+      ??,The word was: 
+      ?,@1
+      @,0
+      <,999 ' Exit loop
+    ;
+
+    @,0
+    +,1
+  ],999 ' End of INNER game loop
+
+  ' --- "PLAY AGAIN?" PROMPT ---
+  ?,===========================
+  @,98 ' Use stack 98 for input
+  >,Play again? (Y/N): 
+  @,98
+  %,U ' Convert to uppercase
+
+  @,98
+  #,"Y"
+    ' User wants to play again, so we do nothing and let the loop continue.
+    !
+    ' If not "Y", we assume the user wants to quit.
+    @,0
+    <,9999 ' Exit main "play again" loop
+  ;
+
+  @,0
+  +,1 ' Increment "play again" loop counter
+],999 ' End of OUTER "play again" loop
+
+
+' --- END OF GAME ---
+?,Thanks for playing!
